@@ -18,10 +18,6 @@ import StdArray
 	}
 derive class iTask Train
 
-
-
-
-
 getRealFromSpan (PxSpan r) = r
 getRealFromSpan _ = 1.0
 
@@ -48,15 +44,15 @@ getElementByPositions pos [elem:tail] = if samePos (Just elem) (getElementByPosi
 		posElem = getPos elem
 getElementByPositions pos [] = Nothing
 
-drawTrainContent train state style events =
-	scale (conv style.vEWidth) (conv style.vEHeight)
+
+trainSVG state =
 	(collage [
 		(px 0.0, px 0.42),
 
 		(px 0.04, px 0.69),(px 0.26, px 0.69),(px 0.48, px 0.69),
 		(px 0.70, px 0.765),(px 0.84, px 0.765),
 
-		case calc of
+		case state of
 			0 = (px 0.32, px 0.01)
 			_ = (px 0.58, px 0.11)
 	] [
@@ -69,7 +65,7 @@ drawTrainContent train state style events =
 		],
 		bigCircle,bigCircle,bigCircle,
 		smallCircle,smallCircle,
-		case calc of
+		case state of
 			0 = (polygon Nothing [
 					(px 0.51, px 0.4),(px 0.57, px 0.4),(px 0.56, px 0.35),(px 0.56, px 0.32),
 					(px 0.55, px 0.29),(px 0.54, px 0.25),(px 0.5, px 0.18),(px 0.47, px 0.15),
@@ -101,9 +97,14 @@ drawTrainContent train state style events =
 		smallCircle = circle (px 0.12) <@< sw <@< fb
 		sw = {strokewidth = zero}
 		fb = {fill = toSVGColor "black"}
+
+
+drawTrainContent train state style events =
+	scale (conv style.vEWidth) (conv style.vEHeight) (trainSVG calc)
+	where
 		calc = if ((calcTmp == 0) || (calcTmp == 2)) 0 1
 		calcTmp = ((train.tDeltaX + train.tDeltaY) / 25)
-
+	
 
 
 instance DrawableObject Train

@@ -13,4 +13,4 @@ class DrawableObject a
 where
 	getImageOffset :: a State GlobalVisualStyle (Events a) -> ImageOffset
 	drawObject :: a State GlobalVisualStyle (Events a) -> Image State
-DrawObjects	:: [a] State GlobalVisualStyle (Events a) -> Image State | DrawableObject a
+drawObjects	:: [a] State GlobalVisualStyle (Events a) -> Image State | DrawableObject a

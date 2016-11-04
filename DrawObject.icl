@@ -29,8 +29,8 @@ where
 	getImageOffset :: a State GlobalVisualStyle (Events a) -> ImageOffset
 	drawObject :: a State GlobalVisualStyle (Events a) -> Image State
 
-DrawObjects	:: [a] State GlobalVisualStyle (Events a) -> Image State | DrawableObject a
-DrawObjects	items state style events =
+drawObjects	:: [a] State GlobalVisualStyle (Events a) -> Image State | DrawableObject a
+drawObjects	items state style events =
 	collage positions drawnItems (Just background)
 	where
 		drawnItems = [drawObject item state style events \\ item <- items]

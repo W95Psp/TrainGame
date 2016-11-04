@@ -133,8 +133,8 @@ convertPositionsToImageOffsets [] = []
 displayMap :: State -> Image State
 displayMap s =
 	collage []
-	[	DrawObjects s.elements s defaultGlobalVisualStyle []
-	,	DrawObjects s.trains s defaultGlobalVisualStyle []
+	[	drawObjects s.elements s defaultGlobalVisualStyle []
+	,	drawObjects s.trains s defaultGlobalVisualStyle []
 	] Nothing
 
 font = normalFontDef "Arial" 9.0
