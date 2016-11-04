@@ -11,9 +11,15 @@ import iTasks.API.Extensions.SVG.SVGlet
 	}
 
 defaultGlobalVisualStyle :: GlobalVisualStyle
+// defaultGlobalVisualStyle = 
+// 	{ vEBackgroundColor	= SVGRGB 26 188 156
+// 	, vEWidth			= px 50.0
+// 	, vEHeight			= px 40.0
+// 	, vEMargin			= px 0.5
+// 	}
 defaultGlobalVisualStyle = 
 	{ vEBackgroundColor	= SVGRGB 26 188 156
-	, vEWidth			= px 50.0
-	, vEHeight			= px 40.0
+	, vEWidth			= px (50.0 * 1.8)
+	, vEHeight			= px (40.0 * 1.8)
 	, vEMargin			= px 0.5
 	}

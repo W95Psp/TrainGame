@@ -3,8 +3,9 @@ module BasicAPIExamples
 import iTasks
 import iTasks.API.Extensions.SVG.SVGlet
 import Element
+import Train
 import State
-import DrawElement
+import DrawObject
 
 Start :: *World -> *World
 Start world = startEngine [
@@ -20,9 +21,8 @@ routeRoles "Track Controller" 	= trackController
 routeRoles "Train Driver" 		= trainDriver
 
 
-
 state :: Shared State
-state = sharedStore "sharedState" {elements = [], trains = [], elementSelected = Nothing}
+state = sharedStore "sharedState" {elements = [], trains = [], elementSelected = Nothing, stateTime = 0}
 
 loopNothing :: Task State
 loopNothing = viewInformation "xx" [] "ddd" >>| loopNothing
@@ -31,7 +31,45 @@ trackDesinger	= loopNothing
 trainDriver		= loopNothing
 
 // trackController	= imageTask
-trackController	= updateSharedInformation "xxx" [] state ||- imageTask
+trackController	= makeTrainMove ||- (updateSharedInformation "xxx" [] state ||- imageTask)
+
+// makeTrainMove :: Task Timestamp
+// makeTrainMove = watch currentTimestamp >^* [
+// 		OnValue (ifValue saa)
+// 	]
+// 	where
+// 		addSeconds n t = t + {Time|hour=0,min=0,sec=n}
+
+		
+
+makeTrainMove :: Task Time
+makeTrainMove = get currentTime >>- \start -> watch currentTime >>* [
+		OnValue (ifValue (\now -> now >= nextSecond start) (\_ . saa))
+	]
+where
+	nextSecond t = t + {Time|hour=0,min=0,sec=1}
+	saa :: Task Time
+	saa = upd (\s . {s & trains = updateTrains s.trains s.elements}) state ||- makeTrainMove
+	updateTrains [train:tail] elements = [
+			case train.tMoving of
+				True = updateMovingTrain train elements
+				False = train
+			:updateTrains tail elements]
+	updateTrains [] _ = []
+	updateMovingTrain train elements
+		| elem == Nothing 		= {train & tMoving = False, tDeltaX = 25}
+		| train.tDeltaX >= 100 	= {train & tDeltaX = 0, tPosition = nextTrainPos}
+							   	= {train & tDeltaX = train.tDeltaX + 25}
+		where
+			nextTrainPos = case elem of
+				Nothing = train.tPosition
+				Just (Section s) = {train.tPosition & x = train.tPosition.x+1}
+				Just (Point p) = case p.pOrientation of
+					NE = {train.tPosition & x = train.tPosition.x+1, y = train.tPosition.y-1}
+					_ = {train.tPosition & x = train.tPosition.x+1, y = train.tPosition.y+1}
+			elem = getElementByPositions train.tPosition elements
+
+
 
 
 // display the shared state as an image and update it
@@ -94,15 +132,9 @@ convertPositionsToImageOffsets [] = []
 
 displayMap :: State -> Image State
 displayMap s =
-	drawElements (buildDrawElementsCtx s.elements s) 
-	drawTrains
-		// collage (convertPositionsToImageOffsets [getPos o \\ o <- s.elements])
-		// 		[drawElement s item \\ item <- s.elements]
-		// 		Nothing
-		// where
-		// 	middle a = a / (px 2.0)
-		// 	arrowWidth = px (arrowScale * 2.0)
-		// 	arrowScale = 10.0
-			// <@< {onclick = \i s.{s & clicks = i + s.clicks, red = not s.red}, local = False}
+	collage []
+	[	DrawObjects s.elements s defaultGlobalVisualStyle []
+	,	DrawObjects s.trains s defaultGlobalVisualStyle []
+	] Nothing
 
 font = normalFontDef "Arial" 9.0

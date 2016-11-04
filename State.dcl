@@ -1,5 +1,7 @@
 definition module State
 
 import Element
-:: State = {elements :: [Element], trains :: [Train], elementSelected :: (Maybe Element)}
+import Train
+
+:: State = {elements :: [Element], trains :: [Train], elementSelected :: (Maybe Element), stateTime :: Int}
 derive class iTask State

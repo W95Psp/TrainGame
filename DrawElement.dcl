@@ -6,29 +6,24 @@ import globalVisualStyle
 import iTasks
 import iTasks.API.Extensions.SVG.SVGlet
 
-:: EventHandlerParam :== String
-:: EventHandler a :== ElementEventHandlerParam -> a -> a
 
-:: ElementVisualStyle 		=
-	{ vEBackgroundColor	:: SVGColor
-	, vEWidth			:: Span
-	, vEHeight			:: Span
-	, vEMargin			:: Span
-	}
+:: ElementEventHandlerParam :== String
+:: ElementEventHandler :== ElementEventHandlerParam -> Element -> Element
+
 :: EventsElements =
 	{ ee_onclickSignal 	:: Maybe ElementEventHandler
 	, ee_onclick 		:: Maybe ElementEventHandler
 	}
 :: DrawElementCtx	= 
-	{ cElement		:: Element
-	, cStyle		:: ElementVisualStyle
-	, cEvents		:: EventsElements
+	{ ceElement		:: Element
+	, ceStyle		:: GlobalVisualStyle
+	, ceEvents		:: EventsElements
 	}
 :: DrawElementsCtx	= 
-	{ csElements	:: [Element]
-	, csState		:: State
-	, csStyle		:: ElementVisualStyle
-	, csEvents		:: EventsElements
+	{ cesElements	:: [Element]
+	, cesState		:: State
+	, cesStyle		:: GlobalVisualStyle
+	, cesEvents		:: EventsElements
 	}
 
 drawElement 		:: DrawElementCtx	-> Image State

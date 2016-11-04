@@ -11,3 +11,4 @@ import iTasks.API.Extensions.SVG.SVGlet
 	}
 
 defaultGlobalVisualStyle :: GlobalVisualStyle
+
