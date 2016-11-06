@@ -12,6 +12,13 @@ Start world = startEngine [
 		publish "/" (WebApp []) (\_ -> chooseRole)
 	] world
 
+
+state :: Shared State
+state = sharedStore "sharedState" {elements = [], trains = [], elementSelected = Nothing, paramTestX = 0.0, paramTestY = 0.0}
+
+
+
+
 chooseRole :: Task State
 chooseRole = trackController
 // chooseRole = enterChoice "Select the role you want to play" [] ["Track Designer", "Track Controller", "Train Driver"] >>= routeRoles
@@ -20,9 +27,6 @@ routeRoles "Track Designer" 	= trackDesinger
 routeRoles "Track Controller" 	= trackController
 routeRoles "Train Driver" 		= trainDriver
 
-
-state :: Shared State
-state = sharedStore "sharedState" {elements = [], trains = [], elementSelected = Nothing, paramTestX = 0.0, paramTestY = 0.0}
 
 loopNothing :: Task State
 loopNothing = viewInformation "xx" [] "ddd" >>| loopNothing
@@ -34,14 +38,21 @@ trainDriver		= loopNothing
 trackController	= makeTrainMove ||- (updateSharedInformation "xxx" [] state ||- imageTask)
 
 
+
 makeTrainMove :: Task Time
-makeTrainMove = get currentTime >>- \start -> watch currentTime >>* [
-		OnValue (ifValue (\now -> now >= nextSecond start) (\_ . saa))
+makeTrainMove = get currentTime >>- \start . watch currentTime >>* [
+		OnValue (ifValue (\now -> now >= nextSecond start) (\_ . 
+				get state >>- (
+					\s . case filter (\t . t.tMoving) s.trains of
+						[] = makeTrainMove
+						_  = (
+								upd (\s . {s & trains = updateTrains s.trains s.elements}) state
+							) ||- makeTrainMove
+				)
+			))
 	]
 where
 	nextSecond t = t + {Time|hour=0,min=0,sec=1}
-	saa :: Task Time
-	saa = upd (\s . {s & trains = updateTrains s.trains s.elements}) state ||- makeTrainMove
 	updateTrains [train:tail] elements = [
 			case train.tMoving of
 				True = updateMovingTrain train elements
