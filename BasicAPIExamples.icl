@@ -12,12 +12,8 @@ Start world = startEngine [
 		publish "/" (WebApp []) (\_ -> chooseRole)
 	] world
 
-
 state :: Shared State
 state = sharedStore "sharedState" {elements = [], trains = [], elementSelected = Nothing, paramTestX = 0.0, paramTestY = 0.0}
-
-
-
 
 chooseRole :: Task State
 chooseRole = trackController
@@ -38,10 +34,9 @@ trainDriver		= loopNothing
 trackController	= makeTrainMove ||- (updateSharedInformation "xxx" [] state ||- imageTask)
 
 
-
 makeTrainMove :: Task Time
 makeTrainMove = get currentTime >>- \start . watch currentTime >>* [
-		OnValue (ifValue (\now -> now >= nextSecond start) (\_ . 
+		OnValue (ifValue (\now -> now > start) (\_ . 
 				get state >>- (
 					\s . case filter (\t . t.tMoving) s.trains of
 						[] = makeTrainMove
@@ -52,7 +47,6 @@ makeTrainMove = get currentTime >>- \start . watch currentTime >>* [
 			))
 	]
 where
-	nextSecond t = t + {Time|hour=0,min=0,sec=1}
 	updateTrains [train:tail] elements = [
 			case train.tMoving of
 				True = updateMovingTrain train elements
