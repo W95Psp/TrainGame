@@ -17,9 +17,10 @@ import DrawObject
 	{ pLabel 		:: String
 	, pPosition 	:: Position
 	, pOrientation 	:: Orientation
+	, pIsUp			:: Bool
 	}
 :: Position = {x :: Int, y :: Int}
-:: Orientation = NE | SE | SW | NW
+:: Orientation = NE | NW
 
 :: Element = Section Section | Point Point
 
@@ -54,7 +55,36 @@ where
 	(==) (Section a) (Section b) 	= a.sPosition == b.sPosition
 	(==) _ _ 	= False
 
+findElementFromPosition :: Position TrainDirection [Element] -> Maybe Element
+findElementFromPosition pos dir lst = case findElementFromPositionSub pos dir lst of
+	Just (Point p) = case p.pIsUp of
+		True = Just (Section {sLabel= p.pLabel
+					, sPosition 	= p.pPosition
+					, sLeftSignal 	= Just True
+					, sRightSignal 	= Just True
+					})
+		False= Just (Point p)
+	anything = anything
 
+findElementFromPositionSub :: Position TrainDirection [Element] -> Maybe Element
+findElementFromPositionSub pos trainDirection [elem:tail] = if samePos (Just elem) (findElementFromPositionSub pos trainDirection tail)
+	where
+		samePos = case elem of
+			(Section s) = eq
+			(Point p) = case p.pIsUp of
+				True  = eq
+				False = if accOrient (posElem == {pos & y = pos.y-1}) eq
+					where
+						accOrient = ((not td) && isNE) || (td && (not isNE)) 
+						isNE = case p.pOrientation of
+							NE = True
+							NW = False
+						td = case trainDirection of
+							GoLeft = True
+							GoRight = False
+		eq = (posElem == pos)
+		posElem = getPos elem
+findElementFromPositionSub pos trainDirection [] = Nothing
 
 drawElementContent :: Element State GlobalVisualStyle (Events Element) -> (Host State) -> (Image State)
 drawElementContent elem state style events = case elem of
@@ -82,20 +112,16 @@ drawElementContent elem state style events = case elem of
 				(px 0.0, style.vEHeight * (px 0.75)),
 				(px 0.0, style.vEHeight * (px 0.75))
 			]
-			[
-				(line Nothing Slash style.vEWidth zero <@< { dash = [2, 3] })
-					 // <@< {draggable = Just(
-					 // 			\u x y s . s
-					 // 		)}
-				,
-				polyline Nothing orient
-			]
+			(
+				if p.pIsUp
+				[l1, polyline Nothing orient <@< { dash = [2, 3] }]
+				[l1 <@< { dash = [2, 3] }, polyline Nothing orient]
+			)
 			where
+				l1 = line Nothing Slash style.vEWidth zero
 				orient = case p.pOrientation of
 					NE -> up
-					SE -> down
 					NW -> down
-					SW -> up
 				where
 					down = [(px 0.0, px 0.0), (style.vEWidth, style.vEHeight)]
 					up = [(px 0.0, px 0.0), (style.vEWidth, zero-style.vEHeight)]

@@ -8,14 +8,20 @@ import iTasks
 import iTasks.API.Extensions.SVG.SVGlet
 import StdArray
 
+:: TrainDirection = GoLeft | GoRight
 :: Train = 
 	{
-		tDeltaX		:: Int,
-		tDeltaY		:: Int,
+		tDelta		:: Int,
 		tPosition	:: Position,
 		tName 		:: String,
-		tMoving		:: Bool
+		tMoving		:: Bool,
+		tDirection	:: TrainDirection
 	}
+getSignFromDir :: TrainDirection -> Int
+getSignFromDir GoLeft = -1
+getSignFromDir GoRight = 1
+
+derive class iTask TrainDirection
 derive class iTask Train
 
 getRealFromSpan (PxSpan r) = r
@@ -23,27 +29,12 @@ getRealFromSpan _ = 1.0
 
 conv r = (getRealFromSpan r) * 0.7
 
-getRotationTrain train elements = 
-		case getElementByPositions train.tPosition elements of
-			Nothing = 12.0
-			Just (Section s) = 0.0
-			Just (Point p) = case p.pOrientation of
-					NE = -42.5
-					SE = 42.5
-					_  = 0.0
-
-getElementByPositions :: Position [Element] -> Maybe Element
-getElementByPositions pos [elem:tail] = if samePos (Just elem) (getElementByPositions pos tail)
-	where
-		samePos = case elem of
-			(Section s) = eq
-			(Point p) = case p.pOrientation of
-				NE = posElem == {pos & y = pos.y-1}
-				_  = eq
-		eq = (posElem == pos)
-		posElem = getPos elem
-getElementByPositions pos [] = Nothing
-
+getRotationTrain element = case element of
+	Nothing = 12.0
+	Just (Section s) = 0.0
+	Just (Point p) = case p.pOrientation of
+			NE = -42.5
+			NW = 42.5
 
 trainSVG state =
 	(collage [
@@ -103,32 +94,39 @@ drawTrainContent train state style events =
 	scale (conv style.vEWidth) (conv style.vEHeight) (trainSVG calc)
 	where
 		calc = if ((calcTmp == 0) || (calcTmp == 2)) 0 1
-		calcTmp = ((train.tDeltaX + train.tDeltaY) / 25)
+		calcTmp = train.tDelta / 25
 	
-
+instance + (Real,Real) where (+) (a,b) (c,d) = (a+c,b+d)
+instance * ImageOffset where (*) (a,b) (c,d) = (a*c,b*d)
 
 instance DrawableObject Train
 where
 	getImageOffset train state style events = case train.tPosition of
-		{x = x, y = y} -> ((px cx) * (wx + m) + mx, (px cy) * (wy + m) + my)
+		{x = x, y = y} -> 
+			  (m + style.vEWidth, m + style.vEHeight) * (toPx (
+			  		  (toReal x, toReal y)
+			  		+ case element of
+			  			Just (Point p) = case p.pOrientation of
+			  				NE = case train.tDirection of
+			  					GoRight	= (-0.3, 0.3)
+			  					GoLeft	= (-0.2, 1.2)
+			  				NW = case train.tDirection of
+			  					GoRight	= (zero,zero)
+			  					GoLeft	= (0.4,-0.65)
+			  			Just (Section s) = (zero, 0.15)
+			  			Nothing = (zero, zero)
+			  		+ ((cos angle) * w, (sin angle) * w)
+			  ))
 		where
-			cx = (toReal x) - isPoint * 0.3
-			cy = (toReal y) + (abs 0.0) * 1.1
-			// cx = (toReal x) + ((toReal train.tDeltaX) / 100.0)
-			// cy = (toReal y) + ((toReal train.tDeltaY) / 100.0)
-			// mx = (px 0.15) * wx
-			mx = (px ((cos (toRad angle)) * w)) * wx
-			my = (px ((sin (toRad angle)) * w)) * wy + (px 0.15) * wy
-			w = (toReal train.tDeltaX) / 100.0
-			isPoint = if ((abs angle)<30.0) 0.0 (0.0 - ((angle) / (abs angle)))
-			// angle = getRotationTrain train state.elements
-			angle = 3.0
-			wx = style.vEWidth
-			wy = style.vEHeight
-			m = style.vEMargin
-			toRad d = d * (pi/180.0)
-			toDeg d = d * (180.0/pi)
+			w			= case train.tDirection of
+							GoLeft  = 0.5 -	howFar
+							GoRight = 		howFar
+			howFar		= (toReal train.tDelta) / 100.0
+			angle		= (pi/180.0) * (getRotationTrain element)
+			element		= findElementFromPosition train.tPosition train.tDirection state.elements
+			m			= style.vEMargin
+			toPx (a,b) 	= (px a, px b)
 	drawObject train state style events = 
 		rotate (deg (
-				getRotationTrain train state.elements
+				getRotationTrain (findElementFromPosition train.tPosition train.tDirection state.elements)
 			)) (drawTrainContent train state style events)

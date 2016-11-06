@@ -4,17 +4,17 @@ import iTasks
 import Element
 import DrawObject
 
-
+:: TrainDirection = GoLeft | GoRight
 :: Train = 
 	{
-		tDeltaX		:: Int,
-		tDeltaY		:: Int,
+		tDelta		:: Int,
 		tPosition	:: Position,
 		tName 		:: String,
-		tMoving		:: Bool
+		tMoving		:: Bool,
+		tDirection	:: TrainDirection
 	}
+derive class iTask TrainDirection
 derive class iTask Train
-
-getElementByPositions :: Position [Element] -> Maybe Element
+getSignFromDir :: TrainDirection -> Int
 
 instance DrawableObject Train

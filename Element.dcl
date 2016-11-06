@@ -1,6 +1,7 @@
 definition module Element
 
 import iTasks
+import Train
 import DrawObject
 
 :: Section =
@@ -13,9 +14,10 @@ import DrawObject
 	{ pLabel 		:: String
 	, pPosition 	:: Position
 	, pOrientation 	:: Orientation
+	, pIsUp			:: Bool
 	}
 :: Position = {x :: Int, y :: Int}
-:: Orientation = NE | SE | SW | NW
+:: Orientation = NE | NW
 :: Element = Section Section | Point Point
 
 derive class iTask Section
@@ -31,3 +33,5 @@ instance == Position
 instance == Element
 
 instance DrawableObject Element
+
+findElementFromPosition :: Position TrainDirection [Element] -> Maybe Element
