@@ -1,4 +1,4 @@
-module BasicAPIExamples
+module RailwayGame
 
 import iTasks
 import iTasks.API.Extensions.SVG.SVGlet

@@ -41,8 +41,10 @@ driveTrain state trainName =
 	) ||- (imageTask state [] [] "" trainName True)
 	where
 		ifState st = ifValue (\s . (getTrainFromState s).tState==st)
+		// update current train from state
 		updateTrain :: (Train -> Train) State -> State
 		updateTrain replaceFunction s = {s & trains = map (\t . if (isMe t) (replaceFunction t) t) s.trains}
+		// fetch current train from state
 		getTrainFromState :: State -> Train
 		getTrainFromState s = case filter isMe s.trains of
 			[h:t] = h
@@ -53,7 +55,9 @@ driveTrain state trainName =
 					tState		= TrainStill,
 					tDirection	= GoRight
 				}
+		// check if current train is t
 		isMe t = t.tName==trainName
+		//Alter train
 		stopTrain t = {t &  
 						tState  = TrainStill
 					}
@@ -62,6 +66,7 @@ driveTrain state trainName =
 						tDirection = dir, 
 						tState  = TrainMoving
 					}
+		// Dirty equality
 		isTrainDirEq dir b = case dir of
 			GoLeft = case b.tDirection of
 				GoLeft = True

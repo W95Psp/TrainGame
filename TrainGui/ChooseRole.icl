@@ -17,26 +17,27 @@ chooseRole state =
 		>>* [OnValue (hasValue routeRoles)]
 	)
 	where
-		optionsName = ["Design railway track", "Controller railway track", "Drive a new train", "Drive a existing train"]
+		//Returns the n-th choice among "Design railway track", "Controller railway track", "Drive a new train", "Drive a existing train"
 		getNth	  n = sub optionsName n
 			where
 				sub [h:t] 0 = h
 				sub [_:t] n = sub t (n-1)
 				sub [] 	  n = ""
+				optionsName = ["Design railway track", "Controller railway track", "Drive a new train", "Drive a existing train"]
+		//launch right role accoding user choice
 		routeRoles 0 	= upd (\s . {s & elementSelected = Nothing}) state >>| trackDesigner state True
 		routeRoles 1 	= trackController state True
-		routeRoles 2	= (
-					get state 
-				>>- \s .	enterInformation
+		routeRoles 2	=
+			(	get state >>- \s .	enterInformation	//Use state to fetch list of existing trains
 								(	"Choose the name of your train " +++ 
 									case map (\t . "\"" +++ t.tName +++ "\"") s.trains of
 										[]  = "(There is no any train, currently)"
 										lst = "(Already taken: " +++ (join ", " lst) +++ ")"
 								) []
-				>>* [
+				>>* [//button for train creation
 						OnAction (Action "Drive my new train!" [ActionIcon "ok"]) (
 							ifValue (
-								\name . case filter (\t . t.tName == name) s.trains of
+								\name . case filter (\t . t.tName == name) s.trains of //not allowed to set a same name for two different trains
 									[] = True
 									_  = False
 							) (\n . return n)
@@ -56,7 +57,8 @@ chooseRole state =
 						P = {x = 0, y = 0}
 		routeRoles 3	= get state >>- \s . enterChoice "Select the train you want to control" [] [item.tName \\ item <- s.trains]
 									>>* [OnValue (hasValue driveTrainWithQuitButton)]
+		//Launch driveTrain GUI and take care of removing train afterwards
 		driveTrainWithQuitButton name = driveTrain state name >>* [
-							OnAction (Action "Quit" [ActionIcon "close"])
+							OnAction (Action "Remove my train and quit" [ActionIcon "close"])
 							(always (upd (\s . {s & trains = filter (\t . not (t.tName==name)) s.trains}) state))
 						]

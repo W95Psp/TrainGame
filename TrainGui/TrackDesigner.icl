@@ -55,6 +55,7 @@ trackDesigner state showTrains = get state >>- \startState .
 	]
 	where
 		addNew w = always (upd (\s . {s & elements = [w:s.elements], elementSelected = Just w}) state >>| trackDesigner state showTrains)
+		// check if elementSelected was updated
 		different stateBefore stateNow = not (stateBefore.elementSelected == stateNow.elementSelected)
 		manageElement s = case s.elementSelected of
 			Just (Section section) = updateSharedInformation "Manage selection" [
@@ -117,6 +118,7 @@ trackDesigner state showTrains = get state >>- \startState .
 								Just _ = Nothing
 								_ = Just True
 							})
+		// allow to change Point orientation
 		eClickSection e _ = case e of
 			Point p   = Point {p & pOrientation = case p.pOrientation of
 						NW = NE

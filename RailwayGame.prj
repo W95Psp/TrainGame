@@ -2,7 +2,7 @@ Version: 1.4
 Global
 	ProjectRoot:	.
 	Target:	iTasks
-	Exec:	{Project}/BasicAPIExamples.exe
+	Exec:	{Project}/RailwayGame.exe
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	True
@@ -38,13 +38,11 @@ Global
 		GenerateDLL:	False
 		ExportedNames:	
 	Paths
-		Path:	{Project}
-		Path:	{Project}/Ligretto
-		Path:	{Project}/iTaskGraphics
+		Path:	{Project}/
 	Precompile:	
 	Postlink:	
 MainModule
-	Name:	BasicAPIExamples
+	Name:	RailwayGame
 	Dir:	{Project}
 	Compiler
 		NeverMemoryProfile:	False
@@ -60,7 +58,7 @@ MainModule
 OtherModules
 	Module
 		Name:	ImageTask
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -74,7 +72,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	Objects.DrawObject
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -88,7 +86,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	Objects.Element
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -102,7 +100,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	Objects.Train
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -116,7 +114,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	State
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -130,7 +128,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	TrainGui.ChooseRole
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -144,7 +142,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	TrainGui.DriveTrain
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -158,7 +156,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	TrainGui.MakeTrainMove
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -172,7 +170,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	TrainGui.TrackController
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -186,7 +184,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	TrainGui.TrackDesigner
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False
@@ -200,7 +198,7 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	globalVisualStyle
-		Dir:	{Project}
+		Dir:	{Project}/
 		Compiler
 			NeverMemoryProfile:	False
 			NeverTimeProfile:	False

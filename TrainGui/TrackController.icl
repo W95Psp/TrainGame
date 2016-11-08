@@ -33,6 +33,7 @@ trackController state showTrains	=
 			False= OnAction (Action "Show trains" []) (always (trackController state True))
 	]
 	where
+		//fetch an array of controls to have from state
 		getAllControls [a:b] = case a of
 			Section s = 
 				(if (isJust s.sRightSignal)
@@ -50,6 +51,7 @@ trackController state showTrains	=
 				imageTask state (MakeEventsList [eSigLeft, eSigRight, (ONCLICK_POINT, eClickSection)])
 				[] "" "" showTrains
 			)
+		//we define some event handler
 		eSigLeft = (ONCLICK_LEFT_SIGNAL, \e _ . case e of
 				Point p = Point p
 				Section s = Section {s & sLeftSignal = case s.sLeftSignal of

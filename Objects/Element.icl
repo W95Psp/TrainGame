@@ -7,6 +7,7 @@ import globalVisualStyle
 import iTasks.API.Extensions.SVG.SVGlet
 import Objects.DrawObject
 
+// define stuctures
 :: Section =
 	{ sLabel 		:: String
 	, sPosition 	:: Position
@@ -57,7 +58,7 @@ where
 
 findElementFromPosition :: Position TrainDirection [Element] -> Maybe Element
 findElementFromPosition pos dir lst = case findElementFromPositionSub pos dir lst of
-	Just (Point p) = case p.pIsUp of
+	Just (Point p) = case p.pIsUp of // if the Point is Up, then it can be seen as a section, hence, we return a section (already handled in collision and stuff)
 		True = Just (Section {sLabel= p.pLabel
 					, sPosition 	= p.pPosition
 					, sLeftSignal 	= Just True
@@ -129,7 +130,7 @@ drawElementContent elem state style events backColor = case elem of
 
 
 
-
+// implements DrawableObject for Element
 instance DrawableObject Element
 where
 	getImageOffset elem state style events = case getPos elem of
