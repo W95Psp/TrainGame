@@ -1,8 +1,8 @@
-definition module Element
+definition module Objects.Element
 
 import iTasks
-import Train
-import DrawObject
+import Objects.Train
+import Objects.DrawObject
 
 :: Section =
 	{ sLabel 		:: String

@@ -1,4 +1,4 @@
-implementation module DrawObject
+implementation module Objects.DrawObject
 
 import StdOrdList
 import iTasks
@@ -9,6 +9,22 @@ import globalVisualStyle
 :: EventHandlerParam 	:== String
 :: EventHandler a		:== a EventHandlerParam -> a 
 :: Events a				:== [(Int, EventHandler a)]
+
+ONCLICK_ELEMENT 					:: Int
+ONCLICK_ELEMENT 					= 0
+ONCLICK_POINT 						:: Int
+ONCLICK_POINT 						= 1
+ONCLICK_SECTION 					:: Int
+ONCLICK_SECTION 					= 2
+ONCLICK_TRAIN						:: Int
+ONCLICK_TRAIN						= 3
+ONCLICK_LEFT_SIGNAL 				:: Int
+ONCLICK_LEFT_SIGNAL 				= 4
+ONCLICK_RIGHT_SIGNAL 				:: Int
+ONCLICK_RIGHT_SIGNAL 				= 5
+// CLICK_ON_ 						= 0
+// CLICK_ON_ 						= 0
+
 MakeEventsList :: [(Int, EventHandler a)] -> Events a
 MakeEventsList list = sortBy f list
 	where
@@ -27,13 +43,14 @@ getEvent events name = case fetchEvent events name of
 class DrawableObject a
 where
 	getImageOffset :: a State GlobalVisualStyle (Events a) -> ImageOffset
-	drawObject :: a State GlobalVisualStyle (Events a) -> Image State
+	drawObject :: a State GlobalVisualStyle (Events a) String -> Image State
 
-drawObjects	:: [a] State GlobalVisualStyle (Events a) -> Image State | DrawableObject a
-drawObjects	items state style events =
+
+drawObjects	:: [a] State GlobalVisualStyle (Events a) String -> Image State | DrawableObject a
+drawObjects	items state style events param =
 	collage positions drawnItems (Just background)
 	where
-		drawnItems = [drawObject item state style events \\ item <- items]
+		drawnItems = [drawObject item state style events param \\ item <- items]
 		positions = convertItemsIntoImageOffset items
 		convertItemsIntoImageOffset [item:tail] = [getImageOffset item state style events:convertItemsIntoImageOffset tail]
 		convertItemsIntoImageOffset [] = []

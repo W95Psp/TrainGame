@@ -1,11 +1,11 @@
-implementation module Element
+implementation module Objects.Element
 
 import iTasks
 import State
-import Train
+import Objects.Train
 import globalVisualStyle
 import iTasks.API.Extensions.SVG.SVGlet
-import DrawObject
+import Objects.DrawObject
 
 :: Section =
 	{ sLabel 		:: String
@@ -51,8 +51,8 @@ where
 
 instance == Element
 where
-	(==) (Point a) (Point b) 		= a.pPosition == b.pPosition
-	(==) (Section a) (Section b) 	= a.sPosition == b.sPosition
+	(==) (Point a) (Point b) 		= a.pPosition == b.pPosition// && a.pLabel == b.pLabel
+	(==) (Section a) (Section b) 	= a.sPosition == b.sPosition// && a.sLabel == b.sLabel
 	(==) _ _ 	= False
 
 findElementFromPosition :: Position TrainDirection [Element] -> Maybe Element
@@ -86,8 +86,8 @@ findElementFromPositionSub pos trainDirection [elem:tail] = if samePos (Just ele
 		posElem = getPos elem
 findElementFromPositionSub pos trainDirection [] = Nothing
 
-drawElementContent :: Element State GlobalVisualStyle (Events Element) -> (Host State) -> (Image State)
-drawElementContent elem state style events = case elem of
+drawElementContent :: Element State GlobalVisualStyle (Events Element) SVGColor -> (Host State) -> (Image State)
+drawElementContent elem state style events backColor = case elem of
 		Section s 	-> 
 			collage [
 				(px 0.0, style.vEHeight * (px 0.75)),
@@ -96,17 +96,17 @@ drawElementContent elem state style events = case elem of
 			]
 			[
 				line Nothing Slash style.vEWidth zero,
-				showSignal s.sLeftSignal,  //<@< {onclick = update ctx.ceEvents.ee_onclickSignal "L", local = False},
-				showSignal s.sRightSignal //<@< {onclick = update ctx.ceEvents.ee_onclickSignal "R", local = False}
+				showSignal s.sLeftSignal <@< {onclick = update (fetchEvent events ONCLICK_LEFT_SIGNAL) "", local = False},
+				showSignal s.sRightSignal <@< {onclick = update (fetchEvent events ONCLICK_RIGHT_SIGNAL) "", local = False}
 			]
 			where
-				showSignal Nothing	= circle (px 9.0) <@< {fill = style.vEBackgroundColor} <@< {stroke = style.vEBackgroundColor}
+				showSignal Nothing	= circle (px 9.0) <@< {fill = backColor} <@< {stroke = backColor}
 				showSignal (Just s)	= circle (px 6.0) <@< strokeSty <@< (if s green red)
 							 // <@< {onclick = update, local = False}
 				strokeSty	= {strokewidth = (px 0.4)}
 				green		= {fill = toSVGColor "green"}
 				red			= {fill = toSVGColor "red"}
-				// update = updateElementInState (Section s)
+				update = updateElemInState (Section s)
 		Point p 	-> 
 			collage [
 				(px 0.0, style.vEHeight * (px 0.75)),
@@ -137,26 +137,43 @@ where
 		where
 			m = style.vEMargin
 			toPx = px o toReal
-	drawObject elem state style events = 
-		overlay [(AtMiddleX,AtBottom)] [] [text font (getLabel elem)]
-		(Just (
-			(
-				(drawElementContent elem state style events)
-				(Just background)// <@< {strokewidth = (px (if selected 1.0 0.0))})
-			)
-		))
+	drawObject elem state style events param = 
+		case isGlobalEventDefined of
+			True  = all <@< (
+						if (isSelected && isPoint)
+						{onclick = update (fetchEvent events ONCLICK_POINT) "", local = False}
+						{onclick = (\i s . {s & elementSelected = if isSelected Nothing (Just elem)}), local = False}
+					)
+			False = if (isPoint) (all <@< {onclick = update (fetchEvent events ONCLICK_POINT) "", local = False}) all
 		where
-			background = rect style.vEWidth height <@< {fill = style.vEBackgroundColor} <@< {strokewidth = px 0.0}
+			all = overlay [(AtMiddleX,AtBottom)] [] [text font (getLabel elem)]
+				(Just (
+					(
+						(
+							drawElementContent elem state style events backColor
+						)
+						(Just background)// <@< {strokewidth = (px (if selected 1.0 0.0))})
+					)
+				))
+			background = rect style.vEWidth height <@< {fill = backColor} <@< {strokewidth = px 0.0}
 			height = style.vEHeight + case elem of
 										Point p	-> style.vEHeight + style.vEMargin
 										_		-> zero
+			update = updateElemInState elem
+			backColor = if (isSelected && isGlobalEventDefined) (toSVGColor "#2ecc71") style.vEBackgroundColor
+			isSelected = case state.elementSelected of
+					Just x = x==elem
+					_ 	   = False
+			isPoint = case elem of
+					Point _= True
+					_ 	   = False
+			isGlobalEventDefined = case fetchEvent events ONCLICK_ELEMENT of
+				Just _ = True
+				_ 		= False
 
-// updateElementInState :: Element (Maybe ElementEventHandler) -> ElementEventHandlerParam -> Int -> State -> State 
-// updateElementInState elem Nothing = \_ . \i s . s
-// updateElementInState elem (Just w) = \param . \i s . {s & elements = (copyOrAlter s.elements (w param) elem)}
-// 	where
-// 		copyOrAlter [current:tail] w elem = [if (current == elem) (w elem) current:copyOrAlter tail w elem]
-// 		copyOrAlter [] _ _ = []
+updateElemInState :: Element (Maybe (EventHandler Element)) -> EventHandlerParam -> Int -> State -> State
+updateElemInState item Nothing = \_ . \i s . s
+updateElemInState item (Just w) = \param . \i s . {s & elements = map (\j . if (j==item) (w item param) j) s.elements}
 
 font = normalFontDef "Arial" 9.0
 
