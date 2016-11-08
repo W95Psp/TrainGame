@@ -172,9 +172,9 @@ where
 				Just _ = True
 				_ 		= False
 
+// function to update specific element in state
 updateElemInState :: Element (Maybe (EventHandler Element)) -> EventHandlerParam -> Int -> State -> State
 updateElemInState item Nothing = \_ . \i s . s
 updateElemInState item (Just w) = \param . \i s . {s & elements = map (\j . if (j==item) (w item param) j) s.elements}
 
 font = normalFontDef "Arial" 9.0
-
